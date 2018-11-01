@@ -6,8 +6,8 @@ import (
 )
 
 type worker struct {
-	in chan int
-	wg *sync.WaitGroup
+	in   chan int
+	done func()
 }
 
 func main() {
@@ -17,14 +17,16 @@ func main() {
 func doWorker(workid int, c worker) {
 	for n := range c.in {
 		fmt.Printf("recerve %d content %c\n", workid, n)
-		c.wg.Done()
+		c.done()
 	}
 }
 
 func createWorker(id int, wg *sync.WaitGroup) worker {
 	c := worker{
 		in: make(chan int),
-		wg: wg,
+		done: func() {
+			wg.Done()
+		},
 	}
 	go doWorker(id, c)
 	return c
